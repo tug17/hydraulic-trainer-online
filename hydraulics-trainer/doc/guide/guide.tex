@@ -1,0 +1,81 @@
+\documentclass[a4paper]{article}
+
+\usepackage[top=25mm,bottom=25mm,left=25mm,right=25mm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+%\usepackage[german]{babel}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\usepackage{nth}
+% \usepackage{float}
+\usepackage{bm}
+\usepackage{commath}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{hyperref}
+
+\pgfplotsset{compat=1.17}
+
+\newcommand*{\captionsource}[2]{%
+    \caption[{#1}]{%
+        #1%
+        \\\hspace{\linewidth}%
+        Source: #2%
+    }%
+}
+
+\newcommand{\fabs}{\mathop{\mathrm{abs}}}
+
+\captionsetup[table]{skip=5pt}
+
+\graphicspath{ {images/} }
+
+\pgfplotstableset{
+    col sep=comma,
+    columns/node/.style={
+        column type=r,
+        column name={Node}
+    },
+    every head row/.style={
+        before row=\toprule,
+        after row=\midrule
+    },
+    every last row/.style={
+        after row=\bottomrule
+    }
+}
+
+\title{ezProbs Guide}
+\author{Richard P\"ottler 1530149}
+\date{\today}
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\maketitle
+
+\newpage
+
+\pagenumbering{Roman}
+
+\tableofcontents
+
+\newpage
+
+\pagenumbering{arabic}
+
+\input{01_introduction.tex}
+\newpage
+\input{02_problem.tex}
+\newpage
+
+%% \listoffigures
+%% \listoftables
+
+\end{document}

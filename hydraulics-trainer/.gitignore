@@ -1,0 +1,8 @@
+__pycache__
+*.aux
+*.lof
+*.log
+*.lot
+*.toc
+.auctex-auto
+*.out

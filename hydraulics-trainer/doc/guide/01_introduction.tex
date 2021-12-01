@@ -1,0 +1,52 @@
+\section{Introduction}
+
+\subsection{Architecture}
+
+\verb+ezProbs+ is basically a web application where various problems can be listed.
+Numerical values can be configured using sliders.
+
+\subsubsection{Problems}
+
+A problem consists of the following sections:
+
+\begin{description}
+  \item[Description] general description of the problem
+  \item[Plot] optional plot of the current calculated result
+  \item[Parameters] configurable parameters for the problem
+  \item[Solution] description of the calculation
+\end{description}
+
+\subsection{Requirements}
+
+On a Debian system the following packages must be installed:
+
+\begin{itemize}
+  \item \verb+python3-scipy+
+  \item \verb+python3-numpy+
+  \item \verb+python3-pandas+
+  \item \verb+python3-matplotlib+
+  \item \verb+python3-flask+
+  \item \verb+python3-svgwrite+
+\end{itemize}
+
+\subsection{Development}
+
+The following commands are used to start the development server:
+
+\begin{verbatim}
+export FLASK_ENV=development
+export FLASK_APP=ezprobs
+flask run
+\end{verbatim}
+
+\subsection{Configuration}
+
+The following parameters can be set in the \verb+config.ini+:
+
+\begin{itemize}
+  \item \verb+server.secret_key+ a string to set the password with which
+    cookies are enctrypted on the client
+  \item \verb+application.submit_on_change+ a boolean to controll whether the
+    calculation should be kicked off once a parameter slider is changed
+\end{itemize}
+

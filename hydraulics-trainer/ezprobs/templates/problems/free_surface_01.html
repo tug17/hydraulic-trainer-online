@@ -1,0 +1,30 @@
+{% extends "problem.html" %}
+
+{% block title %}Flow Regime Transition{% endblock %}
+
+{% block description %}
+Given is a river section as shown below.
+
+<div class="container" align="center">
+  <figure class="figure">
+    <img src="{{ url_for('static', filename='images/free_surface_01.png') }}"
+         class="figure-img img-fluid rounded"
+         alt="setting">
+    <figcaption class="figure-caption">Channel description</figcaption>
+  </figure>
+</div>
+
+The discharge is given with \(q\) and width of the rectangular river with \(w\).
+The inclination of the river bed is defined with \(I_s\).
+$$
+\begin{align}
+q &= 30\:\mathrm{m^3/s} \\
+w &= 4\:\mathrm{m} \\
+I_s &= 7.9 \cdot 10^{-3} \\
+\end{align}
+$$
+{% endblock %}
+
+{% block solution %}
+{% include "problems/free_surface_01_solution.html" ignore missing with context %}
+{% endblock %}

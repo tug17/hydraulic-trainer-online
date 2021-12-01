@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <style>
+  .MAINPLOT{
+  	display: block;
+  	width: 50em;
+  	height: 30em;
+  	overflow: hidden;
+    margin-left: auto;
+    margin-right: auto
+  }
+  .SMALLPLOT{
+  	display: block;
+  	width: 30em;
+  	height: 15em;
+  	overflow: hidden;
+    margin-left: auto;
+    margin-right: auto
+  }
+  .FORMULAR3LINES{
+  	display: block;
+  	width: 50em;
+  	height: 8em;
+  	overflow: hidden;
+    margin-left: auto;
+    margin-right: auto
+  }
+  .SLIDER{
+  	display: block;
+  	width: 50em;
+  	overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+	margin-bottom: 1rem!important
+  }
+  </style>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <title>ezProbs</title>
+  </head>
+  <body>
+    <header>
+        <nav  class="navbar navbar-expand-md">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="/">ezProbs</a>
+
+            <div class="collapse navbar-collapse">
+              <ul class="navbar-nav">
+
+                <!-- <li class="nav-item"> -->
+                <!--   <a class="nav-link active" href="#">Home</a> -->
+                <!-- </li> -->
+
+                {% for category, problems in config.problems.items() %}
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
+                    {{ category }}
+                  </a>
+                  <ul class="dropdown-menu">
+                    {% for name, link in problems.items() %}
+                    <li><a class="dropdown-item" href="/problems/{{ link }}">{{ name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </li>
+                {% endfor%}
+
+              </ul>
+            </div>
+
+          </div>
+        </nav>
+    </header>
+
+    <div class="container" id="content">{% block content %}{% endblock %}</div>
+
+	<script src="{{ url_for('static', filename='js/getscroll.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mathjax/tex-mml-chtml.js') }}"></script>
+    {% block onload_js %}{% endblock %}
+  </body>
+</html>

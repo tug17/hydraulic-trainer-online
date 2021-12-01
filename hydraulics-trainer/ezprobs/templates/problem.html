@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>{% block title %}{% endblock %}</h1>
+
+  <h2>Description</h2>
+  {% block description %}{% endblock %}
+
+  {% if plot %}
+  <h2>Solution</h2>
+  <div class="MAINPLOT">
+    <figure class="figure">
+      <img id="plot" src="{{ plot.url }}" class="figure-img img-fluid rounded" alt="{{ plot.alt }}">
+      {% if plot.caption %}
+      <figcaption class="figure-caption">{{ plot.caption }}</figcaption>
+      {% endif %}
+    </figure>
+  </div>
+  {% endif %}
+
+  <form method="POST">
+    {% if parameters %}
+    <!--<h2>Parameters</h2>-->
+    {% for p in parameters %}
+    <div class="mb-3">
+      <label for="{{ p.name }}" class="form-label">{{ p.display }} = <span id="{{ p.name }}-display"></span> \(\mathrm{ {{ p.unit }} }\)</label>
+      <input type="range" class="form-range" id="{{ p.name }}" name="{{ p.name }}" min="{{ p.val_min }}" max="{{ p.val_max }}" step="{{ p.val_step }}">
+      {% if p.description %}<div class="form-text">{{ p.description }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% if not config.submit_on_change %}
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    {% endif %}
+  </form>
+
+  {% if solution %}
+  <h2>Summary</h2>
+  <span id="solution">{% block solution %}{% endblock %}</span>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block onload_js %}
+<script>
+  function redateUrl(urlString) {
+      var d = new Date();
+      url = /^(?:\/|[a-z]+:\/\/)/.test(urlString)
+          ? new URL(urlString)
+          : new URL(urlString, window.location.href);
+      url.searchParams.set("_date", d.getTime());
+      return url.toString();
+  }
+
+  function redateImg(img) {
+      img.attr('src', redateUrl(img.attr('src')));
+  }
+
+  $(document).ready(function() {
+      {% if parameters %}
+      {% for p in parameters %}
+      $("#{{ p.name }}").val({{ p.val_initial }});
+      $("#{{ p.name }}-display").text($("#{{ p.name }}").val());
+      {% endfor %}
+      {% endif %}
+  });
+
+  {% if parameters %}
+  {% for p in parameters %}
+  $("#{{ p.name }}").change(function() {
+      $("#{{ p.name }}-display").text($(this).val());
+
+      {% if config.submit_on_change %}
+      $.post("ajax", $("form").serialize(), function(data) {
+          // reload plot
+          redateImg($("#plot"));
+          // reload solution html
+          $("#solution").html(data);
+          MathJax.typeset()
+          // reload solution images
+          $('#solution > img').each(function(i, e) {
+              redateImg($(e));
+          });
+      }).fail(function(e) {
+          alert("error while executing ajax");
+      });
+      {% endif %}
+	  localStorage.setItem('scrollpos', window.scrollY);
+  });
+  {% endfor %}
+  {% endif %}
+</script>
+{% endblock %}

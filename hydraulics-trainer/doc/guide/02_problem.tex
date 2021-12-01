@@ -1,0 +1,460 @@
+\section{Problems}
+
+In this section the steps needed to create a new problem will be discussed.
+
+\subsection{Skeleton}
+
+In this subsection the bare minimum of steps will be discussed to create the
+skeleton of a problem.
+
+\subsubsection{Template}
+
+The template controls how the problem is displayed on on the client. All
+templates are basically \verb+HTML+ processed by the
+\href{https://jinja.palletsprojects.com/}{Jinja} template engine.
+
+To create a new problem a new file with a descriptive name must be created
+under \verb+ezprobs/templates/problems+. This file should have the extension
+\verb+.html+. The content of the file might look like something like this:
+
+\begin{lstlisting}[language=html]
+{% extends "problem.html" %}
+
+{% block title %}TEST{% endblock %}
+
+{% block description %}
+test description
+{% endblock %}
+
+{% block solution %}
+test solution
+{% endblock %}
+\end{lstlisting}
+
+The \verb+extends+ directive is mandatory and causes the generation of e.g. the
+parameter section.  The \verb+title+, \verb+description+ and \verb+solution+
+blocks are also mandatory. The \verb+title+ block is used to set the title of
+the problem. The remaining blocks will be described in subsequent sections.
+
+During this demonstration the file will be saved as \verb+ezprobs/templates/problems/test.html+.
+
+\subsubsection{Python Code}
+
+All problems are implemented as
+\href{https://flask.palletsprojects.com/}{Flask} blueprints.
+
+The problem python files should be saved under the \verb+ezprobs/problems+
+directory with a representative name. The minimum code needed to implement a
+problem is as follows:
+
+\begin{lstlisting}[language=python]
+from flask import Blueprint, render_template
+
+bp = Blueprint("test", __name__)
+
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    return render_template("problems/test.html")
+\end{lstlisting}
+
+The name provided to the \verb+Blueprint+ constructer must be unique across the
+whole application. The template provided to the \verb+render_template+
+function must be the filename of the previously created template.
+
+For this demonstration the file will be called \verb+ezprobs/problems/test.py+.
+
+\subsubsection{Linking}
+
+To make the problem available in the Flask application it must be linked in it.
+This will be done by modifying \verb+ezprobs/__init__.py+ by adding the
+following lines to make the demonstration example available:
+
+\begin{lstlisting}[language=python]
+import ezprobs.problems.test
+app.register_blueprint(
+    problems.test.bp, url_prefix="/problems/test"
+)
+\end{lstlisting}
+
+This loads the newly created module and makes the blueprint available under the
+given url. The problem should be acessible by pointing the browser to
+\href{http://localhost:5000/problems/test/}{http://localhost:5000/problems/test/} if the development server is running.
+
+The values must be changed to the names of the current problem to add.
+
+By convention problems should be linked under \verb+/problems+.
+
+To make the problem available in the menu bar a new entry must be added to the
+the \verb+app.config["problems"]+ dictionary. To make The \verb+test+ problem
+available a new \verb+Test Runs+ section is added and the problem is named
+\verb+Test+.
+
+\begin{lstlisting}[language=python]
+app.config["problems"] = {
+    "Hydraulics": {
+        "Flow Regime Transition": "flow_regime_transition_fit_3",
+        "Pressure Pipe": "pressure_pipe",
+    },
+    "Mathematics": {
+        "XY Problem": "xy",
+    },
+    "Test Runs": {
+        "Test": "test",
+    },
+}
+\end{lstlisting}
+
+\subsection{Description}
+
+The \verb+description+ block in the template is used to describe the problem at hand.
+
+\subsection{Parameters}
+
+It is possible to customize the problem's calculation with parameters which can
+be altered to the user's choosing. For this a instance of
+\verb+ezprobs.problems.Parameter+ must be created and passed to the
+\verb+render_template+ funciton.
+
+The \verb+Parameter+ constructor takes the following arguments:
+\begin{itemize}
+  \item \verb+name+ with which the value of the parameter should be read from the resulting request.
+  \item \verb+display+ name of the value on the page
+  \item \verb+val_min+ minimum value of the slider
+  \item \verb+val_max+ maximum value of the slider
+  \item \verb+val_step+ increment of the value per one slider tick
+  \item \verb+val_initial+ initial value of the parameter on the slider
+  \item \verb+unit+ optional parameter which denotes the unit used for the parameter
+  \item \verb+description+ optional description of the parameter
+\end{itemize}
+
+To get the Parameter section generated with an example parameter the
+\verb+index+ function must be changed as follows:
+
+\begin{lstlisting}[language=python]
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    from ezprobs.problems import Parameter
+    param_a = Parameter(
+        "a",
+        "a_display",
+        0,
+        10,
+        1,
+        5,
+        unit="kN",
+        description="some description",)
+
+    return render_template("problems/test.html", parameters=[param_a])
+\end{lstlisting}
+
+To get the submitted value from the request it has to be retrieved from the
+\verb+POST+ header of the request with the \verb+name+ set in the
+\verb+Parameter+ constructor. In the example code the new \verb+index+ function
+looks as follows:
+
+\begin{lstlisting}[language=python]
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    a = 5
+
+    from flask import request
+    if request.method == 'POST':
+        a = int(request.form['a'])
+
+    from ezprobs.problems import Parameter
+    param_a = Parameter(
+        "a",
+        "a_display",
+        0,
+        10,
+        1,
+        a,
+        unit="kN",
+        description="some description",)
+
+    return render_template("problems/test.html", parameters=[param_a])
+\end{lstlisting}
+
+First the a variable is created with it's initial value. If the request is a
+\verb+POST+ request the value is fetched and cast to the appropriate datatype.
+It is good practice to initialize the parameter with the value from the
+request.
+
+\subsection{Solution}
+
+The solution section will be generated as soon as a \verb+solution+ parameter
+is passed to the \verb+render_template+ function. The \verb+solution+ parameter
+is a dictionary holding the names and values of variables which should be
+displayed in the solution section. In the solution section the dictionary can
+be accessed like any other Jinja variable.
+
+The privious example can be altered as follows to pass the \verb+a+ and
+\verb+result+ variables:
+
+\begin{lstlisting}[language=python]
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    a = 5
+
+    from flask import request
+    if request.method == 'POST':
+        a = int(request.form['a'])
+
+    from ezprobs.problems import Parameter
+    param_a = Parameter(
+        "a",
+        "a_display",
+        0,
+        10,
+        1,
+        a,
+        unit="kN",
+        description="some description",)
+
+    result = a + 5
+
+    return render_template("problems/test.html",
+                           parameters=[param_a],
+                           solution={"a": a, "result": result})
+\end{lstlisting}
+
+The solution dictionary then can be used by changing the solution section as follows:
+
+\begin{lstlisting}[language=html]
+{% block solution %}
+$$result = {{ solution.a }} + 5 = {{ solution.result }}$$
+{% endblock %}
+\end{lstlisting}
+
+\subsection{Images}
+
+\subsubsection{Static Images}
+
+It is possible to use static images in the description or solution section.
+First the imagefile must be saved to the \verb+ezprobs/static/images+
+directory. Afterwards the following snippet can be used to display the image:
+
+\begin{lstlisting}[language=html]
+<div class="container" align="center">
+  <figure class="figure">
+    <img src="{{ url_for('static', filename='images/test.png') }}"
+         class="figure-img img-fluid rounded"
+         alt="alt test">
+    <figcaption class="figure-caption">test description</figcaption>
+  </figure>
+</div>
+\end{lstlisting}
+
+\verb+test.png+ must be adapted to the filename of the actual image which
+should be shown. The \verb+alt="alt test"+ is optional and \verb+alt test+
+should be exchanged for the text which should be shown if the image could not
+be loaded correctly. The \verb+figurecaption+ tag is also optional and provides
+a caption fot the image. \verb+test description+ should be exchanged for the
+caption of the image.
+
+\subsubsection{Graphs}
+
+Graphs are created using \href{https://matplotlib.org/}{Matplotlib}. To do so
+all needed values must be saved to the \verb+session+ to preserve them over the
+HTTP requests. The easiest way to do so is by using the solution dictionary and
+add it to the session as the \verb+solution+ parameter using the following snippet:
+
+\begin{lstlisting}[language=python]
+s = {'name': value}
+
+from flask import session
+session["solution"] = s
+\end{lstlisting}
+
+Afterwards a new flask endpoint is created and the bytes of the image created
+by Matplotlib are streamed to the client. All needed values have to be
+retrieved from the \verb+session+. In our example this could look like
+something like this:
+
+\begin{lstlisting}[language=python]
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    a = 5
+
+    from flask import request
+    if request.method == 'POST':
+        a = int(request.form['a'])
+
+    from ezprobs.problems import Parameter
+    param_a = Parameter(
+        "a",
+        "a_display",
+        0,
+        10,
+        1,
+        a,
+        unit="kN",
+        description="some description",)
+
+    result = a + 5
+
+    s = {"a": a, "result": result}
+
+    from flask import session
+    session["solution"] = s
+
+    return render_template("problems/test.html",
+                           parameters=[param_a],
+                           solution=s)
+
+
+@bp.route("/plot")
+def plot_function():
+    from flask import session
+    a = session["solution"]["a"]
+
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    x = [0, 10]
+    y = [i * a for i in x]
+    ax.plot(x, y)
+
+    from io import BytesIO
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png")
+
+    from flask import Response
+    return Response(buffer.getvalue(), mimetype="image/png")
+\end{lstlisting}
+
+Here the new endpoint created is named \verb+plot+. Once the problem was
+displayed the plot can be viewed under the URL
+\href{http://localhost:5000/problems/test/plot}{http://localhost:5000/problems/test/plot}.
+
+It is generally recommended to reduce the amount of data saved to the session.
+
+The plot can also be included in the solution section using the
+following snippet:
+
+\begin{lstlisting}[language=html]
+<div class="container" align="center">
+  <figure class="figure">
+    <img src="plot"
+         class="figure-img img-fluid rounded"
+         alt="alt plot">
+    <figcaption class="figure-caption">plot description</figcaption>
+  </figure>
+</div>
+\end{lstlisting}
+
+The snippet is similar to the one for the static images but the \verb+src+
+attribute of the \verb+img+ tag now points to the newly defined endpoint.
+
+\subsubsection{Vector Graphics}
+
+Vector graphics are created using
+\href{https://github.com/mozman/svgwrite}{svgwrite}. The procedure is similar
+to the one when creating plots. First create the endpoint, then assemble the
+\verb+Drawing+ and stream it using the \verb|image/svg+xml| mime type.
+
+The example code can be changed to contain the following method:
+
+\begin{lstlisting}[language=python]
+@bp.route("/svg")
+def display_svg():
+    from flask import session
+    a = session["solution"]["a"]
+
+    from svgwrite import Drawing
+    dwg = Drawing()
+    dwg.add(dwg.circle(center=(a, a), r=a))
+
+    from flask import Response
+    return Response(dwg.tostring(), mimetype="image/svg+xml")
+\end{lstlisting}
+
+This creates a new endpoint called \verb+svg+ and can be accessed through
+pointing the browser to
+\href{http://localhost:5000/problems/test/svg}{http://localhost:5000/problems/test/svg}.
+
+Displaying the image is done analog to displaying plots.
+
+\subsubsection{Plots}
+
+Optionally a Plot section can be rendered when displaying the problem. To do
+this a \verb+ezprobs.problems.Plot+ instance must be created and passed to the
+\verb+render_template+function as \verb+plot+ parameter.
+
+The \verb+ezprobs.Plot+ constructor takes the following parameters:
+
+\begin{itemize}
+  \item \verb+url+ URL of the image or plot to display
+  \item \verb+alt+ optional alterante text to display if the plot can't be shown
+  \item \verb+description+ optional description text for the plot
+\end{itemize}
+
+The example code can be altered to show the resulting plot in the actual plot section.
+
+\begin{lstlisting}[language=python]
+@bp.route("/", methods=["POST", "GET"])
+def index():
+    a = 5
+
+    from flask import request
+    if request.method == 'POST':
+        a = int(request.form['a'])
+
+    from ezprobs.problems import Parameter
+    param_a = Parameter(
+        "a",
+        "a_display",
+        0,
+        10,
+        1,
+        a,
+        unit="kN",
+        description="some description",)
+
+    result = a + 5
+
+    s = {"a": a, "result": result}
+
+    from flask import session
+    session["solution"] = s
+
+    from ezprobs.problems import Plot
+    p = Plot("plot", "plot alt", "plot description")
+
+    return render_template("problems/test.html",
+                           parameters=[param_a],
+                           solution=s,
+                           plot=p)
+\end{lstlisting}
+
+The \verb+plot+ endpoint has to be defined previously. Special care must be
+taken to sucessfully initialize and pass all needed variables to the endpoint
+function.
+
+\subsection{Mathematical Expressions}
+
+To render mathematical expressions \href{https://www.mathjax.org/}{MathJax} is
+used. This enables the usage of \LaTeX\ in the \verb+description+ and
+\verb+solution+ blocks.
+
+To use the \LaTeX\ math mode for inline expressions they have to be enclosed in \verb+\(\)+ like:
+
+\begin{lstlisting}
+The discharge is given by \(Q\).
+\end{lstlisting}
+
+To render a single line equation it is enough to enclose it with \verb+$$+ like:
+
+\begin{lstlisting}
+$$f(x) = a \cdot x + b$$
+\end{lstlisting}
+
+For multiline equations an align \LaTeX\ environment should be used like this:
+
+\begin{lstlisting}
+$$
+\begin{align}
+f(x) &= a \cdot x + b \\
+g(x) &= c \cdot x + d \\
+\end{align}
+$$
+\end{lstlisting}

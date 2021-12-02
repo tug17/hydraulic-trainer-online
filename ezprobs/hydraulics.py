@@ -81,7 +81,7 @@ def t_crit_rect(discharge, width):
 def depth_bernoulli_upstream(
     x, starting_depth, discharge, width, strickler_roughness, inclination
 ):
-    """Calculates the depth of given points pasend on the energy equation in upstream direction.
+    """Calculates the depth of given points passed on the energy equation in upstream direction.
     
     ´x´ are the absolute points in x direction. ´starting_depth´ is the depth given at ´x[-1].´
     """
@@ -110,9 +110,20 @@ def depth_bernoulli_downstream(
     ´x´ are the absolute points in x direction. ´starting_depth´ is the depth given at ´x[0].´
     """
     depth = np.zeros(x.shape)
+    Fr = froude(discharge/(starting_depth*width), starting_depth) # works for rectangular channel only
     for i in range(len(x)):
         if i == 0:
             depth[i] = starting_depth
+        elif (Fr >= 0.999):# & (i == 1):
+            depth[i] = depthBernoulli(
+                x[i] - x[i - 1],
+                discharge,
+                depth[i - 1],
+                strickler_roughness,
+                width,
+                inclination,
+                0.5,
+            )
         else:
             depth[i] = depthBernoulli(
                 x[i] - x[i - 1],
@@ -127,20 +138,20 @@ def depth_bernoulli_downstream(
 
 
 def froude(velocity, depth):
-    """Calculates the foude number based on velocity and depth."""
+    """Calculates the froude number based on velocity and depth."""
     return velocity / sqrt(GRAVITY * depth)
 
 
 def depthBernoulli(
-    distance, discharge, depth, strickler_roughness, width, inclination, start=1
+    distance, discharge, depth, strickler_roughness, width, inclination, start=0.1
 ):
     """returns water depth and velocity head in distance x from input water level, negative x for upstream direction"""
-    if distance >= 0:  # calulation direction downstream
+    if distance >= 0:  # calculation direction downstream
         modif = 1
-    elif distance < 0:  # calulation direction upstream
+    elif distance < 0:  # calculation direction upstream
         modif = -1
         distance = -distance
-
+	
     Am = lambda w1, w2, t1, t2: w1 * t1 * 0.5 + w2 * t2 * 0.5
     Um = lambda w1, w2, t1, t2: 0.5 * w1 + t1 + 0.5 * w2 + t2
     Rm = lambda w1, w2, t1, t2: Am(w1, w2, t1, t2) / Um(w1, w2, t1, t2)

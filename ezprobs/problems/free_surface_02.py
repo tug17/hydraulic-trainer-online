@@ -35,10 +35,10 @@ bp = Blueprint("free_surface_02", __name__)
 def compute_solution():
     w = 30 * M
     q = 150 * M3PS
-    i1 = 5 * PERMILLE
-    i2 = 5 * PERMILLE
+    i1 = 3 * PERMILLE
+    i2 = 8 * PERMILLE
 
-    ks1 = 10 * M ** (1 / 3) / S
+    ks1 = 40 * M ** (1 / 3) / S
     ks2 = 70 * M ** (1 / 3) / S
 
     if request.method == "POST":
@@ -73,8 +73,8 @@ def index():
         Parameter(
             "ks1",
             "ks1",
-            10,
-            120,
+            20,
+            100,
             10,
             solution["ks_1"],
             unit="m^{1/3}/s",
@@ -83,8 +83,8 @@ def index():
         Parameter(
             "ks2",
             "ks2",
-            10,
-            120,
+            20,
+            100,
             10,
             solution["ks_2"],
             unit="m^{1/3}/s",
@@ -93,8 +93,8 @@ def index():
         Parameter(
             "i1",
             "i1",
-            1,
-            10,
+            2,
+            8,
             1,
             solution["i1"] / PERMILLE,
             unit="\\unicode{0x2030}",
@@ -103,8 +103,8 @@ def index():
         Parameter(
             "i2",
             "i2",
-            1,
-            10,
+            2,
+            8,
             1,
             solution["i2"] / PERMILLE,
             unit="\\unicode{0x2030}",
@@ -137,10 +137,10 @@ def plot_function():
 
     ## begin calculation  -----------------------------------------------------
     # define plot size
-    x_min = -400 * M
-    x_max = 400 * M
-    y_min = -2.5 * M
-    y_max = 10 * M
+    x_min = -150 * M
+    x_max = 150 * M
+    y_min = -2 * M
+    y_max = 5 * M
     x_padding = 25 * M
 
     xlabels = []
@@ -161,8 +161,11 @@ def plot_function():
         strFlow2 = "ö"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [-l_transition_i_r_rect(q, ks_1, w, t_n1, t_n2, iso1), 0]
-        x_min = xticks[0] - x_padding
-        x_max = xticks[1] + x_padding
+        x_min = min(xticks[0] - x_padding, x_min)
+        x_max = max(xticks[1] + x_padding, x_max)
+        lim_diff = x_max + x_min
+        x_min -= lim_diff/2
+        x_max -= lim_diff/2
 
         # upstream channel
         xx1 = np.linspace(x_min, 0, 101) * M
@@ -186,8 +189,11 @@ def plot_function():
         strFlow2 = "i"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [0, l_transition_i_r_rect(q, ks_2, w, t_n1, t_n2, iso2)]
-        x_min = xticks[0] - x_padding
-        x_max = xticks[1] + x_padding
+        x_min = min(xticks[0] - x_padding, x_min)
+        x_max = max(xticks[1] + x_padding, x_max)
+        lim_diff = x_max + x_min
+        x_min -= lim_diff/2
+        x_max -= lim_diff/2
 
         # upstream channel
         xx1 = np.linspace(x_min, 0, 2) * M
@@ -215,8 +221,11 @@ def plot_function():
             0,
             l_transition_i_r_rect(q, ks_2, w, t_crit, t_n2, iso2),
         ]
-        x_min = xticks[0] - x_padding
-        x_max = xticks[2] + x_padding
+        x_min = min(xticks[0] - x_padding, x_min)
+        x_max = max(xticks[2] + x_padding, x_max)
+        lim_diff = x_max + x_min
+        x_min -= lim_diff/2
+        x_max -= lim_diff/2
 
         # upstream channel
         xx1 = np.linspace(x_min, 0, 101) * M
@@ -253,8 +262,11 @@ def plot_function():
 
             xlabels = ["$t_{N,1}$", "$t_1$", "$t_{N,2} = t_2$"]
             xticks = [0, lv, lv + lw]
-            x_min = xticks[0] - x_padding
-            x_max = xticks[2] + x_padding
+            x_min = min(xticks[0] - x_padding, x_min)
+            x_max = max(xticks[2] + x_padding, x_max)
+            lim_diff = x_max + x_min
+            x_min -= lim_diff/2
+            x_max -= lim_diff/2
 
             # upstream channel
             xx1 = np.linspace(x_min, 0, 101) * M
@@ -301,8 +313,11 @@ def plot_function():
 
             xlabels = ["$t_{N,1} = t_1$", "$t_2$", "$t_{N,2}$"]
             xticks = [-(lw + lv), -lv, 0]
-            x_min = xticks[0] - x_padding
-            x_max = xticks[2] + x_padding
+            x_min = min(xticks[0] - x_padding, x_min)
+            x_max = max(xticks[2] + x_padding, x_max)
+            lim_diff = x_max + x_min
+            x_min -= lim_diff/2
+            x_max -= lim_diff/2
 
             # upstream channel
             xx1 = np.linspace(-600, -(lw + lv), 101) * M
@@ -378,31 +393,37 @@ def plot_function():
     ax.plot(xx, so + depth, "b", label="Wasserspiegel", lw=1.5)
     ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energielinie", lw=1.5)
 
-    plt.text(
-        x_min / 2,
-        y_max,
-        strFlow1,
-        ha="center",
-        va="top",
-        weight="bold",
-        style="italic",
-        size=14,
-    )
-    plt.text(
-        x_max / 2,
-        y_max,
-        strFlow2,
-        ha="center",
-        va="top",
-        weight="bold",
-        style="italic",
-        size=14,
-    )
-
+    #plt.text(
+       # x_min / 2,
+       # y_max,
+       # strFlow1,
+       # ha="center",
+       # va="top",
+       # weight="bold",
+       # style="italic",
+       # size=14,
+    #)
+    #plt.text(
+        #x_max / 2,
+        #y_max,
+        #strFlow2,
+        #ha="center",
+        #va="top",
+        #weight="bold",
+        #style="italic",
+        #size=14,
+    #)
+    plt.suptitle('  A', fontsize=16, fontweight="bold")
+    plt.title(f"{strFlow1}               {strFlow2}", 
+        fontsize=12, 
+        fontweight="bold",
+        fontstyle="italic")
     ## figure style settings --------------------------------------------------
     ax.set_frame_on(False)
     ax.xaxis.grid()
-    ax.set_xlim(x_min, x_max)
+    lim_diff = x_max + x_min
+    ax.set_xlim(x_min-lim_diff/2, x_max-lim_diff/2) # keep x=0 in center of plot
+    #ax.set_xlim(x_min, x_max)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
 
@@ -433,8 +454,9 @@ def plot_function():
     secax.spines["right"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    ax.legend(loc="right")
-
+    #ax.legend(loc="right")
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+          fancybox=True, shadow=True, ncol=3)
     ## cache figure -----------------------------------------------------------
     buffer = BytesIO()
     fig.savefig(buffer, format="png")

@@ -4,9 +4,11 @@
 <div class="container">
   <h1>{% block title %}{% endblock %}</h1>
 
+  <h2>Description</h2>
   {% block description %}{% endblock %}
 
   {% if plot %}
+  <h2>Solution</h2>
   <div class="MAINPLOT">
     <figure class="figure">
       <img id="plot" src="{{ plot.url }}" class="figure-img img-fluid rounded" alt="{{ plot.alt }}">
@@ -34,6 +36,7 @@
   </form>
 
   {% if solution %}
+  <h2>Summary</h2>
   <span id="solution">{% block solution %}{% endblock %}</span>
   {% endif %}
 </div>

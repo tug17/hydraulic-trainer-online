@@ -1,0 +1,16 @@
+/* Sticky Footer Classes */
+
+html,
+body {
+  height: 100%;
+  background: #007bff;
+  background: linear-gradient(to right, #0062E6, #33AEFF);
+}
+.dropdown-item:active{
+ color: red;
+ background-color: darkviolet}
+ 
+ 
+#page-content {
+  flex: 1 0 auto;
+}

@@ -35,18 +35,21 @@
   }
   </style>
   <head>
+    <!-- Cookie-Alert -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/style.css') }}" rel="styles">
 
     <title>ezHydro</title>
   </head>
   <body>
     <header>
-        <nav  class="navbar navbar-expand-md">
+        <nav  class="navbar navbar-expand-md navbar-dark bg-dark">
           <div class="container-fluid">
             <a class="navbar-brand" href="/">ezHydro</a>
 
@@ -62,7 +65,7 @@
                   <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
                     {{ category }}
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu dropdown-menu-dark">
                     {% for name, link in problems.items() %}
                     <li><a class="dropdown-item" href="/problems/{{ link }}">{{ name }}</a></li>
                     {% endfor %}
@@ -76,12 +79,45 @@
           </div>
         </nav>
     </header>
+	
+	<!-- START Bootstrap-Cookie-Alert -->
+	<div class="alert text-center cookiealert" role="alert">
+    <b>Do you like cookies?</b> &#x1F36A; In order to make this website work, we need functional Cookies. <a href="https://cookiesandyou.com/" target="_blank">More infos</a>
+
+    <button type="button" class="btn btn-primary btn-sm acceptcookies">
+        I agree
+    </button>
+	</div>
+	<!-- END Bootstrap-Cookie-Alert -->
 
     <div class="container" id="content">{% block content %}{% endblock %}</div>
+	
+	<body class="d-flex flex-column">
+	  <footer id="sticky-footer" class="flex-shrink-0 py-4 bg-dark text-white-50">
+		<div class="container text-center">
+			<h5 id="credit">Special Credit</h5>
+			<address>
+				Richard Pöttler<br>
+				Manuel Pirker</a>
+			</address>
+			<h5 id="contact">Contact</h5>
+			<address>
+				<strong>Manuel Pirker</strong><br>
+				Stremayrgasse 10/II<br>
+				8010 Graz<br>
+				<abbr title="Phone">Phone:</abbr> +43 316 873 - 8853<br>
+				<abbr title="Email">Email:</abbr> <a href="mailto:manuel.pirker@tugraz.at">manuel.pirker@tugraz.at</a>
+			</address>
+			<h5 id="disclaimer">Disclaimer</h5>
+			<p>This tool was designed for teaching purposes only. We assume no liability for correctness, completeness or current status.</p>
+		</div>
+	  </footer>
+	</body>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mathjax/tex-mml-chtml.js') }}"></script>
+	<script src="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.js"></script>
     {% block onload_js %}{% endblock %}
   </body>
 </html>

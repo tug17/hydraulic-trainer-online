@@ -157,8 +157,8 @@ def plot_function():
     # check flow regime
     isSubCritical = (t_n1 > t_crit, t_n2 > t_crit)
     if isSubCritical == (True, True):
-        strFlow1 = "ö"
-        strFlow2 = "ö"
+        strFlow1 = "sub" #"ö"
+        strFlow2 = "sub" #"ö"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [-l_transition_i_r_rect(q, ks_1, w, t_n1, t_n2, iso1), 0]
         x_min = min(xticks[0] - x_padding, x_min)
@@ -185,8 +185,8 @@ def plot_function():
         head_so = so
         head_depth = depth
     elif isSubCritical == (False, False):
-        strFlow1 = "i"
-        strFlow2 = "i"
+        strFlow1 = "super" #"i"
+        strFlow2 = "super" #"i"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [0, l_transition_i_r_rect(q, ks_2, w, t_n1, t_n2, iso2)]
         x_min = min(xticks[0] - x_padding, x_min)
@@ -213,8 +213,8 @@ def plot_function():
         head_so = so
         head_depth = depth
     elif isSubCritical == (True, False):
-        strFlow1 = "ö"
-        strFlow2 = "i"
+        strFlow1 = "sub" #"ö"
+        strFlow2 = "super" #"i"
         xlabels = ["$t_{N,1}$", "$t_{crit}$", "$t_{N,2}$"]
         xticks = [
             -l_transition_i_r_rect(q, ks_1, w, t_n1, t_crit, iso1),
@@ -248,8 +248,8 @@ def plot_function():
         v_n1 = q / (w * t_n1)
         v_n2 = q / (w * t_n2)
 
-        strFlow1 = "i"
-        strFlow2 = "ö"
+        strFlow1 = "super" #"i"
+        strFlow2 = "sub" #"ö"
 
         t2 = t_n2
         v2 = v_n2
@@ -389,9 +389,13 @@ def plot_function():
     ax.plot([x_min, 0], [x_min * -iso1, 0], "k", lw=1.5)
     ax.plot([0, x_max], [0, x_max * -iso2], "k", lw=3)
 
-    ax.plot(xx, so + t_crit, "k:", label="Krit. Wassertiefe", lw=1.5)
-    ax.plot(xx, so + depth, "b", label="Wasserspiegel", lw=1.5)
-    ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energielinie", lw=1.5)
+    #ax.plot(xx, so + t_crit, "k:", label="Krit. Wassertiefe", lw=1.5)
+    #ax.plot(xx, so + depth, "b", label="Wasserspiegel", lw=1.5)
+    #ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energielinie", lw=1.5)
+
+    ax.plot(xx, so + t_crit, "k:", label="Crit. Water Depth", lw=1.5)
+    ax.plot(xx, so + depth, "b", label="Water Level", lw=1.5)
+    ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energy Line", lw=1.5)
 
     #plt.text(
        # x_min / 2,
@@ -438,7 +442,8 @@ def plot_function():
             -x_min * iso1 + depth[0] + head[0],
         ]
     )
-    ax.set_yticklabels(["$B.H.$", "$Sohle$", "$W.L.$", "$E.H.$"])
+    #ax.set_yticklabels(["$B.H.$", "$Sohle$", "$W.L.$", "$E.H.$"])
+    ax.set_yticklabels(["$R.H.$", "$Bed$", "$W.L.$", "$E.H.$"])
 
     secax = ax.secondary_yaxis("right")
     secax.set_yticks(
@@ -449,7 +454,8 @@ def plot_function():
             -x_min * iso1 + depth[0] + head[0],
         ]
     )
-    secax.set_yticklabels(["$B.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
+    #secax.set_yticklabels(["$B.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
+    secax.set_yticklabels(["$R.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
 
     secax.spines["right"].set_visible(False)
     ax.spines["right"].set_visible(False)

@@ -174,7 +174,7 @@ def plot_function():
     xticks = np.array([0, x[5]])
     yticks = np.sort(np.array([ha, h2, h3, h4]))
 	
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(9,5))
     ax.set_frame_on(False)
     ax.set_xticks(xticks)
     ax.set_xticklabels(['A','B'])
@@ -206,7 +206,7 @@ def plot_function():
     #ax.set_title("Pressure- and Energyline")
 
     buffer = BytesIO()
-    fig.savefig(buffer, format="png", bbox_inch="tight")
+    fig.savefig(buffer, format="png")
     plt.close(fig)
     return Response(buffer.getvalue(), mimetype="image/png")
 

@@ -381,7 +381,7 @@ def plot_function():
 
     head = (q / (w * head_depth)) ** 2 / (2 * GRAVITY)
     ## begin plotting sequence ------------------------------------------------
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(9,5))
     ax.fill_between(xx, so, so + depth, color="b", alpha=0.1)
     ax.fill_between(xx, so, so - 0.5, color="k", alpha=0.1)
 

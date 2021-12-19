@@ -8,8 +8,8 @@
 
   {% if plot %}
   <div class="MAINPLOT">
-    <figure class="figure">
-      <img id="plot" src="{{ plot.url }}" class="figure-img img-fluid rounded" alt="{{ plot.alt }}">
+    <figure class="figure"  style="height:100%">
+      <img id="plot" src="{{ plot.url }}" class="figure-img img-fluid rounded" alt="{{ plot.alt }}" style="height:100%">
       {% if plot.caption %}
       <figcaption class="figure-caption">{{ plot.caption }}</figcaption>
       {% endif %}

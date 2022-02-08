@@ -4,82 +4,98 @@ from flask import Blueprint, Response, render_template, request, session
 from ezprobs.hydraulics import (
     t_n_rect,
     t_crit_rect,
-    ruehlmann_rect,
     l_transition_i_r_rect,
+    depth_bernoulli_upstream,
+    depth_bernoulli_downstream,
+    froude,
 )
+
 from ezprobs.problems import Parameter, Plot
 from ezprobs.units import M, S, M3PS, GRAVITY, PERMILLE
+from ezprobs.dict import DICT_GER, DICT_ENG
+
 from io import BytesIO
+from math import sqrt
 
 import numpy as np
 import matplotlib as mpl
+
 
 mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 
-__author__ = "Richard Pöttler"
-__copyright__ = "Copyright (c) 2021 Richard Pöttler"
+__author__ = "Manuel Pirker"
+__copyright__ = "Copyright (c) 2021 Manuel Pirkerr"
 __license__ = "MIT"
-__email__ = "richard.poettler@gmail.com"
+__email__ = "manuel.pirker@tugraz.at"
 
 
 bp = Blueprint("free_surface_01", __name__)
 
 
 def compute_solution():
-    w = 4 * M
-    q = 30 * M3PS
-    i = 7.6 * PERMILLE
+    w = 30 * M
+    q = 150 * M3PS
+    iso = 8 * PERMILLE
 
-    ks1 = 25 * M ** (1 / 3) / S
-    ks2 = 55 * M ** (1 / 3) / S
+    ks = 40 * M ** (1 / 3) / S
 
     if request.method == "POST":
-        ks1 = int(request.form["ks1"]) * M ** (1 / 3) / S
-        ks2 = int(request.form["ks2"]) * M ** (1 / 3) / S
+        ks = int(request.form["ks"]) * M ** (1 / 3) / S
+        iso = float(request.form["iso"]) * PERMILLE
+        q = int(request.form["q"]) * M3PS
 
     t_crit = t_crit_rect(q, w)
-    t_n1 = t_n_rect(q, ks1, i, w)
-    t_n2 = t_n_rect(q, ks2, i, w)
+    t_n = t_n_rect(q, ks, iso, w)
 
     return {
-        "i": i,
+        "iso": iso,
         "w": w,
         "q": q,
         "t_crit": t_crit,
-        "t_n1": t_n1,
-        "ks_1": ks1,
-        "t_n2": t_n2,
-        "ks_2": ks2,
+        "t_n": t_n,
+        "ks": ks,
     }
 
 
 @bp.route("/", methods=["POST", "GET"])
 def index():
+    lang = DICT_GER
+    
     solution = compute_solution()
     session["solution"] = solution
 
     parameters = [
         Parameter(
-            "ks1",
-            "ks1",
-            20,
-            30,
-            1,
-            solution["ks_1"],
+            "ks",
+            "kst",
+            15,
+            85,
+            5,
+            solution["ks"],
             unit="m^{1/3}/s",
-            description="Strickler value section 1",
+            description=lang["kst_river"],
         ),
         Parameter(
-            "ks2",
-            "ks2",
-            10,
-            70,
-            10,
-            solution["ks_2"],
-            unit="m^{1/3}/s",
-            description="Strickler value section 2",
+            "iso",
+            "iso",
+            5,
+            12,
+            0.5,
+            solution["iso"] / PERMILLE,
+            unit="\\unicode{0x2030}",
+            description=lang["iso"],
+        ),
+        Parameter(
+            "q",
+            "q",
+            100,
+            200,
+            5,
+            solution["q"] / M3PS,
+            unit="m^3/s",
+            description=lang["discharge"],
         ),
     ]
 
@@ -95,111 +111,151 @@ def index():
 
 @bp.route("/plot")
 def plot_function():
-    i = session["solution"]["i"]
+    lang = DICT_GER
+    
+    ## load values  -----------------------------------------------------------
+    iso = session["solution"]["iso"]
     w = session["solution"]["w"]
     q = session["solution"]["q"]
     t_crit = session["solution"]["t_crit"]
-    t_n1 = session["solution"]["t_n1"]
-    ks_1 = session["solution"]["ks_1"]
-    t_n2 = session["solution"]["t_n2"]
-    ks_2 = session["solution"]["ks_2"]
+    t_n = session["solution"]["t_n"]
+    # ks = session["solution"]["ks"]
+    
+    v = q/(t_n*w)
+    fr = v/np.sqrt(GRAVITY*t_n)
 
-    # plot window
-    x_min = -400 * M
-    x_max = 400 * M
-    y_min = 0 * M
-    y_max = 12 * M
-
-    # start and end of the sufrace calculation
-    x_start = -400 * M
-    x_a = 0 * M
-    x_end = 400 * M
-
-    # assemble ruehlmann line
-    xr = []
-    tr = []
-
-    if ks_1 == ks_2:
-        xr.append(x_start)
-        tr.append(t_n1)
-    elif t_n2 < t_crit:
-        # ruehlmann decline until t_crit at point a
-        l_au = ruehlmann_rect(0.99 * t_n1, t_n1, t_crit, t_crit, i)
-        x_start = min(x_start, x_a - l_au)
-
-        xr.append(x_start)
-        xr.append(x_a - l_au)
-        tr.append(t_n1)
-        tr.append(t_n1)
-
-        ys = np.linspace(t_n1, t_crit, 22)
-        for y in ys[1:-1]:
-            xr.append(x_a - ruehlmann_rect(y, t_n1, t_crit, t_crit, i))
-            tr.append(y)
-        xr.append(x_a)
-        tr.append(t_crit)
-
-        # decline with i_r
-        l_transition = l_transition_i_r_rect(q, ks_2, w, t_crit, t_n2, i)
-        xr.append(x_a + l_transition)
-        tr.append(t_n2)
-
-        x_end = max(x_end, x_a + l_transition)
+    if np.round(t_crit,1) == np.round(t_n,1):
+        strFlow = lang["crit"]
+        t_n = t_crit
+        fr=1
+        
+    elif t_crit < t_n:
+        strFlow = lang["sub_l"]
     else:
-        factor = 0.99 if t_n2 < t_n1 else 1.01
-        l_au = ruehlmann_rect(factor * t_n1, t_n1, t_n2, t_crit, i)
-        x_start = min(x_start, x_a - l_au)
+        strFlow = lang["super_l"]
+    ## begin calculation  -----------------------------------------------------
+    # define plot size
+    x_min = -50 * M
+    x_max = 0 * M
+    y_min = -1 * M
+    y_max = 5 * M
 
-        xr.append(x_start)
-        xr.append(x_a - l_au)
-        tr.append(t_n1)
-        tr.append(t_n1)
+    xlabels = []
+    xticks = []
+    
+    
+    xx = np.array([x_min, x_max])
+    so = -xx*iso
+    head = (q / (w * t_n)) ** 2 / (2 * GRAVITY)
+	
+	
+    ## begin plotting sequence ------------------------------------------------
+    fig, ax = plt.subplots(1,2,figsize=(9,5))
+    ax[0].fill_between(xx, so, so + t_n, color="b", alpha=0.1)
+    ax[0].fill_between(xx, so, so - 0.5, color="k", alpha=0.1)
 
-        ys = np.linspace(t_n1, t_n2, 22)
-        for y in ys[1:-1]:
-            xr.append(x_a - ruehlmann_rect(y, t_n1, t_n2, t_crit, i))
-            tr.append(y)
-        xr.append(x_a)
-        tr.append(t_n2)
+    # plot the sole
+    ax[0].plot([x_min, x_max], [x_min * -iso, x_max * -iso], "k", lw=1.5)
 
-    xr.append(x_end)
-    tr.append(t_n2)
+    #ax.plot(xx, so + t_crit, "k:", label="Krit. Wassertiefe", lw=1.5)
+    #ax.plot(xx, so + depth, "b", label="Wasserspiegel", lw=1.5)
+    #ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energielinie", lw=1.5)
 
-    xr = np.array(xr)
-    tr = np.array(tr)
-    yr = (i * (x_max - xr)) + tr
+    ax[0].plot(xx, so + t_crit, "k:", label=lang["tcrit"], lw=2)
+    ax[0].plot(xx, so + t_n, "b", label=lang["wline_l"], lw=1.5)
+    ax[0].plot(xx, so + t_n + head, "r--", label=lang["eline_l"], lw=1.5)
+    
+    ax[0].text(np.mean(xx), y_max, f"Fr = {fr:3.2f}", va="top", ha="center", weight="bold")
 
-    # assemble crit line
-    tcr = np.array([t_crit, t_crit])
-    xcr = np.array([x_start, x_end])
-    ycr = (i * (x_max - xcr)) + tcr
+    ax[0].set_title(f"{strFlow}", 
+        fontsize=12, 
+        fontweight="bold",
+        fontstyle="italic")
+    ## figure style settings --------------------------------------------------
+    ax[0].set_frame_on(False)
+    ax[0].xaxis.grid()
+    ax[0].set_xlim((x_min,x_max)) # keep x=0 in center of plot
+    #ax.set_xlim(x_min, x_max)
+    ax[0].set_xticks(xticks)
+    ax[0].set_xticklabels(xlabels)
 
-    # assemble normal line
-    xn = np.array([x_start, x_a, x_a, x_end])
-    tn = np.array([t_n1, t_n1, t_n2, t_n2])
-    yn = (i * (x_max - xn)) + tn
+    ax[0].axhline(y=-x_min * iso + t_n + head, color="k", lw=0.5, alpha=0.4)
+    ax[0].axhline(y=-x_max * iso, color="k", lw=0.5, alpha=0.4)
+    ax[0].set_ylim(y_min, y_max)
+    ax[0].set_yticks(
+        [
+            -x_max * iso,
+            -x_min * iso,
+            -x_min * iso + t_crit,
+            -x_min * iso + t_n + head,
+        ]
+    )
+    #ax.set_yticklabels(["$B.H.$", "$Sohle$", "$W.L.$", "$E.H.$"])
+    ax[0].set_yticklabels([lang["href_s"], lang["bed"], "$t_{crit}$", lang["ehorizont_s"]])
 
-    # assemble river bed
-    xsole1 = [x_min, x_a]
-    ysole1 = [i * (x_max - x_min), i * (x_max - x_a)]
-    xsole2 = [x_a, x_max]
-    ysole2 = [i * (x_max - x_a), 0]
+    secax = ax[0].secondary_yaxis("right")
+    secax.set_yticks(
+        np.sort([
+            -x_max * iso,
+            -x_max * iso + t_n,
+            -x_max * iso + t_n + head,
+        ])
+    )
+    #secax.set_yticklabels(["$B.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
+    if np.round(t_crit,1) == np.round(t_n,1):
+        secax.set_yticklabels([lang["href_s"], "$t = t_{crit}$", lang["eline_s"]])
+    else:
+        secax.set_yticklabels([lang["href_s"], "$t = t_N$", lang["eline_s"]])
+    
 
-    fig, ax = plt.subplots()
-    ax.plot(xn, yn, label="Normal Depth", color="black", linestyle="dashed")
-    ax.plot(xr, yr, label="Water Surface", color="blue", linewidth=3)
-    ax.plot(xcr, ycr, label="Critical Depth", color="black", linestyle="dashdot")
-    ax.plot(xsole1, ysole1, label="Ground 1", color="black")
-    ax.plot(xsole2, ysole2, label="Ground 2", color="black", linewidth=4)
+    secax.spines["right"].set_visible(False)
+    ax[0].spines["right"].set_visible(False)
 
-    ax.grid()
-    ax.legend()
-    ax.set_xlim(x_min, x_max)
-    ax.set_ylim(y_min, y_max)
-    ax.set_xlabel("Distance [m]")
-    ax.set_ylabel("Height [m]")
-    ax.set_title("Water Surface")
-
+    #ax.legend(loc="right")
+    ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+          fancybox=True, shadow=True, ncol=3)
+    
+    ## second axes diagram
+    xx = np.linspace(0.001,10, 100)
+    xx1 = np.linspace(0.001,t_crit, 50)
+    xx2 = np.linspace(t_crit,10, 50)
+    heads = (q / (w * xx)) ** 2 / (2 * GRAVITY)
+    heads1 = (q / (w * xx1)) ** 2 / (2 * GRAVITY)
+    heads2 = (q / (w * xx2)) ** 2 / (2 * GRAVITY)
+    crit_head = (q / (w * t_crit)) ** 2 / (2 * GRAVITY)
+    
+    ax[1].plot(xx + heads, xx, color='k', lw=2)
+    ax[1].fill_betweenx( xx1, xx1 + heads1, color='g', alpha=0.15)
+    ax[1].fill_betweenx( xx2, xx2 + heads2, color='r', alpha=0.15)
+    ax[1].fill_betweenx( [0,-0.5], [5,5], color='k', alpha=0.1)
+    ax[1].plot(xx, xx, color='k', lw=1.5, ls='--')
+    ax[1].plot([0, 5], [t_crit, t_crit], color='k', lw=2, ls=':')
+    ax[1].plot([0, t_n], [t_n, t_n], color='b', lw=2)
+    ax[1].plot([t_n, t_n+head], [t_n, t_n], color='r', lw=2)
+    
+    ax[1].text(1,0.5,lang["super_s"], color='grey', size=12, style="italic", weight='bold')
+    ax[1].text(1,3,lang["sub_s"], color='grey', size=12, style="italic", weight='bold')
+    
+    ax[1].axis("equal")
+    ax[1].set_xlim((0,5))
+    ax[1].set_ylim(ax[0].get_ylim())
+    ax[1].set_frame_on(False)
+    ax[1].set_xticks(np.sort([
+            0,
+            t_crit + crit_head,
+        ]))
+    ax[1].set_xticklabels(["0","$H_{min}$"])
+    ax[1].set_yticks(np.sort([
+            -x_max * iso,
+            -x_max * iso + t_n,
+        ]))
+    ax[1].set_yticklabels([" "," "])
+    ax[1].xaxis.grid()
+    ax[1].yaxis.grid()
+    ax[1].set_xlabel(lang["ehead"])
+    ax[1].set_title(f"q={q:4.1f} $m^3/s$")
+    
+    ## cache figure -----------------------------------------------------------
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
     plt.close(fig)

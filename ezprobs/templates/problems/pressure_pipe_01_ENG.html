@@ -1,19 +1,21 @@
 {% extends "problem.html" %}
 
-{% block title %}Druckabfluss{% endblock %}
+{% block title %}Pressure Pipe{% endblock %}
 
 {% block description %}
+Given is a pipe system as shown below.
+
 <div class="container" align="center">
   <figure class="figure">
     <img src="{{ url_for('static', filename='images/pressure_pipe_01.png') }}"
          class="figure-img img-fluid rounded"
          alt="setting">
-    <figcaption class="figure-caption">Speicher</figcaption>
+    <figcaption class="figure-caption">Reservoir setup</figcaption>
   </figure>
 </div>
 
-\(k\) \(\nu\).
- \(\zeta_{entry}\).
+The roughness of the pipes is defined by the \(k\) and the kinematic viscosity by \(\nu\).
+The entry loss to the pipe system is given by \(\zeta_{entry}\).
 
 $$
 %\begin{align}

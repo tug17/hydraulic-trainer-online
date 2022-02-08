@@ -1,0 +1,24 @@
+{% extends "problem.html" %}
+
+{% block title %}Pressurized Flow between Basins{% endblock %}
+
+{% block description %}
+Given is a pipe connecting basin A with basin B. The roughness of the pipes is defined by the \(k\) and the kinematic viscosity by \(\nu\).
+Its entry loss is given by \(\zeta_{entry}\).
+
+The water level in basin B and the diameter of the pipe can be varied with the rulers below.
+$$
+\begin{align}
+h_A &= 350.00\:\mathrm{m.a.s.l.} \\
+h_{outlet} &= 250.00\:\mathrm{m.a.s.l.} \\
+l_{pipe} &= 300.00\:\mathrm{m} \\
+k &= 0.3\:\mathrm{mm} \\
+\zeta_{entry} &= 0.5\\
+\nu &= 1.3\cdot10^{-6}\:\mathrm{m^2/s} \\
+\end{align}
+$$
+{% endblock %}
+
+{% block solution %}
+{% include "problems/pressure_pipe_02_solution.html" ignore missing with context %}
+{% endblock %}

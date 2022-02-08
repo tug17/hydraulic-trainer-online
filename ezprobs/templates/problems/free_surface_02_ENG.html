@@ -1,0 +1,37 @@
+{% extends "problem.html" %}
+
+{% block title %}Flow Regime Transition{% endblock %}
+
+{% block description %}
+Imagine a channel with a constant discharge as shown in Figure 1. At the
+beginning, the roughness and inclination of both sections of the channel are the
+same for both sections (\(k_{st,1}=k_{st,2}, \, i_1=i_2\)).
+Try now to decrease the roughness of section 2. Which water depth is present at
+the transition point A?
+
+Attention: The Strickler value is indirect proportional to the "felt" roughness
+-  meaning larger Strickler values represent smoother conditions.
+
+<div class="SMALLPLOT">
+  <figure class="figure">
+    <img src="{{ url_for('static', filename='images/free_surface_01.png') }}"
+         class="figure-img img-fluid rounded"
+         alt="setting">
+    <figcaption class="figure-caption">Figure 1: Channel description</figcaption>
+  </figure>
+</div>
+
+The discharge is given with \(q\) and width of the rectangular river with \(w\).
+<div class="FORMULAR3LINES">
+	$$
+	\begin{align}
+	q &= 150\:\mathrm{m^3/s} \\
+	w &= 30\:\mathrm{m} \\
+	\end{align}
+	$$
+</div>
+{% endblock %}
+
+{% block solution %}
+{% include "problems/free_surface_02_solution.html" ignore missing with context %}
+{% endblock %}

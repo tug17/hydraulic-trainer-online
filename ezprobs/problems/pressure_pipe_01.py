@@ -5,6 +5,7 @@ from ezprobs.geometry import area_circle
 from ezprobs.hydraulics import pipe_loss, local_loss
 from ezprobs.problems import Parameter, Plot
 from ezprobs.units import M, CM, MM, M3PS, KINEMATIC_VISCOSITY, GRAVITY
+from ezprobs.dict import DICT_GER, DICT_ENG
 from io import BytesIO
 from math import sqrt
 from scipy.optimize import fsolve
@@ -109,6 +110,8 @@ def compute_solution():
 
 @bp.route("/", methods=["POST", "GET"])
 def index():
+    lang = DICT_GER
+    
     solution = compute_solution()
     session["solution"] = solution
 
@@ -121,7 +124,7 @@ def index():
             2,
             solution["d1"] / CM,
             unit="cm",
-            description="Diameter of the pipe between I and II",
+            description=lang["dia_between"] + " I & II",
         ),
         Parameter(
             "d2",
@@ -131,7 +134,7 @@ def index():
             2,
             solution["d2"] / CM,
             unit="cm",
-            description="Diameter of the pipe between II and III",
+            description=lang["dia_between"] + " II & III",
         ),
         Parameter(
             "d3",
@@ -141,7 +144,7 @@ def index():
             2,
             solution["d3"] / CM,
             unit="cm",
-            description="Diameter of the pipe between III and VI",
+            description=lang["dia_between"] + " III & VI",
         ),
     ]
 
@@ -157,6 +160,8 @@ def index():
 
 @bp.route("/plot")
 def plot_function():
+    lang = DICT_GER
+    
     ha = 360.0 * M
     hb = 197.2 * M
     h2 = 231.6 * M
@@ -164,15 +169,20 @@ def plot_function():
     h4 = 210.45 * M
 	
     x = session["solution"]["x"]
+    d1 = session["solution"]["d1"]
+    d2 = session["solution"]["d2"]
+    d3 = session["solution"]["d3"]
+    q = session["solution"]["discharge"]
     pipe = session["solution"]["pipe"]
     energy_horizon = session["solution"]["energy_horizon"]
     energy_line = session["solution"]["energy_line"]
     pressure_line = session["solution"]["pressure_line"]
+    
 
     #xticks = np.array([0, l1, l1+l2, l1+l2+l3])
     #xticks = np.array([])
     xticks = np.array([0, x[5]])
-    yticks = np.sort(np.array([ha, h2, h3, h4]))
+    # yticks = np.sort(np.array([ha, h2, h3, h4]))
 	
     fig, ax = plt.subplots(figsize=(9,5))
     ax.set_frame_on(False)
@@ -180,14 +190,17 @@ def plot_function():
     ax.set_xticklabels(['A','B'])
     #ax.set_yticks(yticks)
 	
-    ax.plot(x, energy_horizon, label="Energy Horizon", color="red", linestyle="dashdot", lw=1)
-    ax.plot(x, energy_line, label="Energy Line", color="red", lw=1.5)
-    ax.plot(x, pressure_line, label="Pressure Line", color="blue", linestyle="dashed", lw=1.5)
-    ax.plot(x, pipe, label="Pipe Axis", color="black", linestyle="dashdot", lw=1)
+    ax.plot(x, energy_horizon, label=lang["ehorizont_l"], color="red", linestyle="dashdot", lw=1)
+    ax.plot(x, energy_line, label=lang["eline_l"], color="red", lw=1.5)
+    ax.plot(x, pressure_line, label=lang["pline_l"], color="blue", linestyle="dashed", lw=1.5)
+    ax.plot(x, pipe, label=lang["paxis"], color="black", linestyle="dashdot", lw=1)
 	
 	# plot reservoirs
     ax.plot(np.array([-50, 0]), np.array([ha, ha]), color="blue", lw=1.5)
     ax.plot(np.array([x[5], x[5]+50]), np.array([hb, hb]), color="blue", lw=1.5)
+    ax.plot(np.array([-50, -50, 0, 0]), np.array([ha+3, ha-20, ha-20, ha+3]), color="k", lw=1.5)
+    ax.plot(np.array([x[5], x[5], x[5]+50, x[5]+50]), np.array([hb+3, hb-20, hb-20, hb+3]), color="k", lw=1.5)
+    
     ax.fill_between(np.array([-50, 0]), np.array([ha, ha]), np.array([ha, ha])-20, color="b", alpha=0.1)
     ax.fill_between(np.array([x[5], x[5]+50]), np.array([hb, hb]), np.array([hb, hb])-20, color="b", alpha=0.1)
 
@@ -196,13 +209,19 @@ def plot_function():
     ax.text(x[1],h2,'II', va='top', ha='center')
     ax.text(x[3],h3,'III', va='bottom', ha='center')
     ax.text(x[5],h4,' IV')
+    ax.text(x[-1], ha, lang["ehorizont_s"], ha='right', va="bottom")
+    
+    ax.text((x[0]+x[1])/2,(ha-10+h2)/2,f"DN{int(d1*1000)}",ha="right", va="top", color='k')
+    ax.text((x[1]+x[3])/2,(h3+h2)/2,f"DN{int(d2*1000)}",ha="left", va="top", color='k')
+    ax.text((x[3]+x[5])/2,(h3+h4)/2,f"DN{int(d3*1000)}",ha="right", va="top", color='k')
 	
     ax.grid(axis='x')
+    plt.title(lang["discharge"]+f" q = {q:4.3f} $m^3/s$")
     ax.legend()
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=4)
     #ax.set_xlabel("Distance [m]")
-    ax.set_ylabel("Height [m.a.s.l.]")
+    ax.set_ylabel(lang["hasl"])
     #ax.set_title("Pressure- and Energyline")
 
     buffer = BytesIO()

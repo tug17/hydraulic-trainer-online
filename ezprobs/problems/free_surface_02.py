@@ -12,6 +12,8 @@ from ezprobs.hydraulics import (
 
 from ezprobs.problems import Parameter, Plot
 from ezprobs.units import M, S, M3PS, GRAVITY, PERMILLE
+from ezprobs.dict import DICT_GER, DICT_ENG
+
 from io import BytesIO
 from math import sqrt
 
@@ -66,6 +68,8 @@ def compute_solution():
 
 @bp.route("/", methods=["POST", "GET"])
 def index():
+    lang = DICT_GER
+    
     solution = compute_solution()
     session["solution"] = solution
 
@@ -78,7 +82,7 @@ def index():
             10,
             solution["ks_1"],
             unit="m^{1/3}/s",
-            description="Strickler value section 1",
+            description=lang["kst_river"] + " 1",
         ),
         Parameter(
             "ks2",
@@ -88,7 +92,7 @@ def index():
             10,
             solution["ks_2"],
             unit="m^{1/3}/s",
-            description="Strickler value section 2",
+            description=lang["kst_river"] + " 2",
         ),
         Parameter(
             "i1",
@@ -98,7 +102,7 @@ def index():
             1,
             solution["i1"] / PERMILLE,
             unit="\\unicode{0x2030}",
-            description="Inclination section 1",
+            description=lang["iso"] + " 1",
         ),
         Parameter(
             "i2",
@@ -108,7 +112,7 @@ def index():
             1,
             solution["i2"] / PERMILLE,
             unit="\\unicode{0x2030}",
-            description="Inclination section 2",
+            description=lang["iso"] + " 2",
         ),
     ]
 
@@ -124,6 +128,8 @@ def index():
 
 @bp.route("/plot")
 def plot_function():
+    lang = DICT_GER
+    
     ## load values  -----------------------------------------------------------
     iso1 = session["solution"]["i1"]
     iso2 = session["solution"]["i2"]
@@ -157,8 +163,8 @@ def plot_function():
     # check flow regime
     isSubCritical = (t_n1 > t_crit, t_n2 > t_crit)
     if isSubCritical == (True, True):
-        strFlow1 = "sub" #"ö"
-        strFlow2 = "sub" #"ö"
+        strFlow1 = lang["sub_s"] #"ö"
+        strFlow2 = lang["sub_s"] #"ö"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [-l_transition_i_r_rect(q, ks_1, w, t_n1, t_n2, iso1), 0]
         x_min = min(xticks[0] - x_padding, x_min)
@@ -185,8 +191,8 @@ def plot_function():
         head_so = so
         head_depth = depth
     elif isSubCritical == (False, False):
-        strFlow1 = "super" #"i"
-        strFlow2 = "super" #"i"
+        strFlow1 = lang["super_s"] #"i"
+        strFlow2 = lang["super_s"] #"i"
         xlabels = ["$t_{N,1}$", "$t_{N,2}$"]
         xticks = [0, l_transition_i_r_rect(q, ks_2, w, t_n1, t_n2, iso2)]
         x_min = min(xticks[0] - x_padding, x_min)
@@ -213,8 +219,8 @@ def plot_function():
         head_so = so
         head_depth = depth
     elif isSubCritical == (True, False):
-        strFlow1 = "sub" #"ö"
-        strFlow2 = "super" #"i"
+        strFlow1 = lang["sub_s"] #"ö"
+        strFlow2 = lang["super_s"] #"i"
         xlabels = ["$t_{N,1}$", "$t_{crit}$", "$t_{N,2}$"]
         xticks = [
             -l_transition_i_r_rect(q, ks_1, w, t_n1, t_crit, iso1),
@@ -248,8 +254,8 @@ def plot_function():
         v_n1 = q / (w * t_n1)
         v_n2 = q / (w * t_n2)
 
-        strFlow1 = "super" #"i"
-        strFlow2 = "sub" #"ö"
+        strFlow1 = lang["super_s"] #"i"
+        strFlow2 = lang["sub_s"] #"ö"
 
         t2 = t_n2
         v2 = v_n2
@@ -393,9 +399,9 @@ def plot_function():
     #ax.plot(xx, so + depth, "b", label="Wasserspiegel", lw=1.5)
     #ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energielinie", lw=1.5)
 
-    ax.plot(xx, so + t_crit, "k:", label="Crit. Water Depth", lw=1.5)
-    ax.plot(xx, so + depth, "b", label="Water Level", lw=1.5)
-    ax.plot(head_xx, head_so + head_depth + head, "r--", label="Energy Line", lw=1.5)
+    ax.plot(xx, so + t_crit, "k:", label=lang["tcrit"], lw=1.5)
+    ax.plot(xx, so + depth, "b", label=lang["wline_l"], lw=1.5)
+    ax.plot(head_xx, head_so + head_depth + head, "r--", label=lang["eline_l"], lw=1.5)
 
     #plt.text(
        # x_min / 2,
@@ -443,7 +449,7 @@ def plot_function():
         ]
     )
     #ax.set_yticklabels(["$B.H.$", "$Sohle$", "$W.L.$", "$E.H.$"])
-    ax.set_yticklabels(["$R.H.$", "$Bed$", "$W.L.$", "$E.H.$"])
+    ax.set_yticklabels([lang["href_s"], lang["bed"], lang["wline_s"], lang["ehorizont_s"]])
 
     secax = ax.secondary_yaxis("right")
     secax.set_yticks(
@@ -455,7 +461,7 @@ def plot_function():
         ]
     )
     #secax.set_yticklabels(["$B.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
-    secax.set_yticklabels(["$R.H.$", "$W.L.$", "$E.L.$", "$E.H.$"])
+    secax.set_yticklabels([lang["href_s"], lang["wline_s"], lang["eline_s"], lang["ehorizont_s"]])
 
     secax.spines["right"].set_visible(False)
     ax.spines["right"].set_visible(False)

@@ -230,8 +230,8 @@ def plot_function():
     ax[1].fill_betweenx( [0,-0.5], [5,5], color='k', alpha=0.1)
     ax[1].plot(xx, xx, color='k', lw=1.5, ls='--')
     ax[1].plot([0, 5], [t_crit, t_crit], color='k', lw=2, ls=':')
-    ax[1].plot([0, t_n], [t_n, t_n], color='b', lw=2)
-    ax[1].plot([t_n, t_n+head], [t_n, t_n], color='r', lw=2)
+    ax[1].plot([0, t_n], [t_n, t_n], color='b', lw=2, label=lang["wlvl"])
+    ax[1].plot([t_n, t_n+head], [t_n, t_n], color='r', lw=2, label=lang["vlvl"])
     
     ax[1].text(1,0.5,lang["super_s"], color='grey', size=12, style="italic", weight='bold')
     ax[1].text(1,3,lang["sub_s"], color='grey', size=12, style="italic", weight='bold')
@@ -254,6 +254,9 @@ def plot_function():
     ax[1].yaxis.grid()
     ax[1].set_xlabel(lang["ehead"])
     ax[1].set_title(f"q={q:4.1f} $m^3/s$")
+    
+    ax[1].legend(loc='upper left',
+        fancybox=True, shadow=True, ncol=1)
     
     ## cache figure -----------------------------------------------------------
     buffer = BytesIO()

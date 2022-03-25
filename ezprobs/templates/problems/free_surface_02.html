@@ -3,26 +3,11 @@
 {% block title %}Fließwechsel{% endblock %}
 
 {% block description %}
-(\(k_{st,1}=k_{st,2}, \, i_1=i_2\))
 
-<div class="SMALLPLOT">
-  <figure class="figure">
-    <img src="{{ url_for('static', filename='images/free_surface_01.png') }}"
-         class="figure-img img-fluid rounded"
-         alt="setting">
-    <figcaption class="figure-caption">Flussbett mit unterschiedlicher Rauhigkeit</figcaption>
-  </figure>
-</div>
+Ändert sich der Fließzustand in einem Gerinne spricht man von einem Fließwechsel. Geschiet dieser Wechsel von schießenden auf strömenden Abfluss, findet ein Wechselsprung statt. Hierbei ist vorallem die Lage des Wechselsprungs interessant, da diese sowohl im schießenden als auch im strömenden Bereich liegen kann.
 
-\(q\) \(w\).
-<div class="FORMULAR3LINES">
-	$$
-	\begin{align}
-	q &= 150\:\mathrm{m^3/s} \\
-	w &= 30\:\mathrm{m} \\
-	\end{align}
-	$$
-</div>
+Welche Art von Fließwechsel auftritt hängt - bei gleichbleibenden Abfluss - von den Sohlgefällen \(I_{so,1}, I_{so,2}\) und den Rauhigkeiten \(k_{st,1}, k_{st,2}\) ab.  
+
 {% endblock %}
 
 {% block solution %}

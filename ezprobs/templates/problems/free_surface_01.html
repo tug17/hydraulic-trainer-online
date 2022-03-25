@@ -1,10 +1,24 @@
 {% extends "problem.html" %}
 
-{% block title %}Fließzustand{% endblock %}
+{% block title %}Fließzustände{% endblock %}
 
 {% block description %}
-asda asd asd asd s 
+Die Strickler Formel ist eine Fließformel die zur überschlägiggen Berechnung der mittleren Fließgeschwindigkeit eines Gewässeres herangezogen wird. 
+Sie beschreibt den Zusammenhang zwischen der mittleren - unbeeinflussten - Fließgeschwindigkeit \(v_{m}\), Sohlgefälle \(I_{so}\) sowie der Geometrie (durch den hydraulischen Radius \(R_{hyd}\)) und Rauhigkeit \(k_{st}\)eines Gerinnes.
 
+\begin{align}
+v_{m} = k_{st} \cdot R_{hyd}^{2/3} \cdot I_{so}^{1/2}
+\end{align}
+
+Mit dieser Fließgeschwindigkeit lässt sich nun auch der Fließzustand im Gerinne feststellen. Ist diese nämlich größer als die Wellenausbreitungsgeschwindigkeit, spricht man von einem "schießenden" Abfluss. Im alternativen Fall spricht man vom strömenden" Abfluss.
+Zur Untscheidung dient die sogenante Froudzahl \(Fr)\):
+ 
+ \begin{align}
+Fr = \frac{v_m}{\sqrt{g\cdot t}}
+\end{align}
+
+, wobei die Wellengeschwindigkeit über die Wellengleichung für flache Gewässer mit der Wassertiefe \(t\) hergeleitet wird.
+Im Energiediagramm wird auch der physikalische Hintergrund dieser Unterscheidung sichtbar. Die Wassertiefe mit dem geringsten Energiegehalt bei einem bestimmten Abfluss wird als kritische Wassertiefe bezeichnet (\(Fr=1\)).
 {% endblock %}
 
 

@@ -15,16 +15,28 @@ config = ConfigParser()
 config.read("config.ini")
 app.secret_key = config["server"]["secret_key"]
 
+#app.config["problems"] = {
+#    "Hydraulics": {
+#		"Free Surface Flow: Strickler": "flow_regime",
+#		"Free Surface Flow: Flow Transition": "flow_regime_transition_bernoulli",
+#		"Pressurized Flow: Pipe between Basins": "pressure_pipe_single",
+#        "Pressurized Flow: Pipe System": "pressure_pipe",
+#    },
+#    "Mathematics": {
+#        "Linear Equation: Test only": "xy",
+#    },
+	
 app.config["problems"] = {
-    "Hydraulics": {
-		"Free Surface Flow: Strickler": "flow_regime",
-		"Free Surface Flow: Flow Transition": "flow_regime_transition_bernoulli",
-		"Pressurized Flow: Pipe between Basins": "pressure_pipe_single",
-        "Pressurized Flow: Pipe System": "pressure_pipe",
+    "Hydraulik": {
+		"Freispiegelabfluss: Strickler Formel": "flow_regime",
+		"Freispiegelabfluss: Fließwechsel": "flow_regime_transition_bernoulli",
+		"Druckabfluss: Rohr zwischen Behälter": "pressure_pipe_single",
+        "Druckabfluss: Rohrsystem": "pressure_pipe",
     },
-    "Mathematics": {
-        "Linear Equation: Test only": "xy",
+    "Mathematik": {
+        "Lineare Gleichung: Nur für Testzwecke": "xy",
     },
+	
 }
 app.config["submit_on_change"] = config["application"].getboolean("submit_on_change")
 

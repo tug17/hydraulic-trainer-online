@@ -28,10 +28,11 @@ app.secret_key = config["server"]["secret_key"]
 	
 app.config["problems"] = {
     "Hydraulik": {
-		"Freispiegelabfluss: Strickler Formel": "flow_regime",
-		"Freispiegelabfluss: Fließwechsel": "flow_regime_transition_bernoulli",
-		"Druckabfluss: Rohr zwischen Behälter": "pressure_pipe_single",
+        "Freispiegelabfluss: Strickler Formel": "flow_regime",
+        "Freispiegelabfluss: Fließwechsel": "flow_regime_transition_bernoulli",
+        "Druckabfluss: Rohr zwischen Behälter": "pressure_pipe_single",
         "Druckabfluss: Rohrsystem": "pressure_pipe",
+        "Druckabfluss: Pumpturbine": "pressure_pump_turbine",
     },
     "Mathematik": {
         "Lineare Gleichung: Nur für Testzwecke": "xy",
@@ -47,9 +48,11 @@ import ezprobs.problems.free_surface_01
 import ezprobs.problems.free_surface_02
 import ezprobs.problems.pressure_pipe_01
 import ezprobs.problems.pressure_pipe_02
+import ezprobs.problems.pressure_pipe_03
 
 app.register_blueprint(demo.bp, url_prefix="/demo")
-app.register_blueprint(problems.xy.bp, url_prefix="/problems/xy")
+app.register_blueprint(
+    problems.xy.bp, url_prefix="/problems/xy")
 app.register_blueprint(
     problems.free_surface_01.bp, url_prefix="/problems/flow_regime"
 )
@@ -61,4 +64,7 @@ app.register_blueprint(
 )
 app.register_blueprint(
     problems.pressure_pipe_02.bp, url_prefix="/problems/pressure_pipe_single"
+)
+app.register_blueprint(
+    problems.pressure_pipe_03.bp, url_prefix="/problems/pressure_pump_turbine"
 )

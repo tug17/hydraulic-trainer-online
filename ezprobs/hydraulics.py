@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from math import atan, log, sqrt
+from math import atan, log, sqrt, log10
 
 import numpy as np
 from scipy.optimize import fsolve
@@ -229,3 +229,20 @@ def pipe_loss(l, a, k, d, q):
 def local_loss(nu, a, q):
     """Calculates a local loss for a given discharge"""
     return nu / (2 * GRAVITY * a ** 2) * q ** 2
+
+def calculate_lambda(v,k,d,vis ):
+    right_term = -2*log10(k*1e-3/(3.71*d))
+    lambda_1 = 1/pow(right_term,2)
+    Re = v*d/vis
+    control = Re*k*1e-3/d
+    if control >= 1300:
+        return lambda_1
+    else:
+        delta = 1
+        lambda_1 = 0.0000001 
+        while delta > 0.0001:
+            should = 1/sqrt(lambda_1)
+            is_now = -2*log10(2.51/(Re*sqrt(lambda_1))+k*1e-3/(3.71*d))
+            delta = should - is_now
+            lambda_1 = lambda_1 + 0.000001
+        return lambda_1

@@ -3,8 +3,24 @@
 {% block title %}Betrieb einer Pumpturbine{% endblock %}
 
 {% block description %}
- \(k\)  \(\nu\).
-\(\zeta_{entry}\).
+Der Transport einer Flüssigkeit von Punkt A nach Punkt B ist energetisch immer verlustbehaftet.<br />
+Nach Abzug der gesamten Verluste vom Höhenunterschied der Behälter erhält man die \(Nutzfallhöhe\) \(h_{N}\).<br />
+Diese steht nun zur Energiegewinnung mit Hilfe einer Turbine bereit.<br />
+<br />
+Die \(manometrische\ Förderhöhe\) \(h_{m}\) hingegen ist die Höhe die inklusive Höhenunterschied und Verlusten<br />
+mit Hilfe einer Pumpe überwunden werden muss um einen Durchfluss zu gewährleisten.<br />
+<br />
+In diesem Beispiel wird zwischen 3 Zuständen unterschieden. Das Wasser fließt:<br />
+1. von dem niedrigeren zu dem höheren Behälter. Hierfür wird eine Pumpleistung benötigt.<br />
+2. von dem höheren zu dem niedrigeren Behälter mit gemäßigtem Durchfluss. Hierbei kann eine Pumpe betrieben werden.<br />
+3. von dem höheren zu dem niedrigeren Behälter mit einem erhöhten Durchfluss. Hierfür wird eine Pumpleistung benötigt.<br />
+<br />
+Ziel dieses Beispiels ist es, die benötigte Pump-, bzw. erbrachte Turbinenleistung zu berechnen.<br />
+Bei der Eingabe der Werte ist zu beachten, dass sich positive Werte auf eine Durchflussrichtung von links nach rechts beziehen<br />
+und negative Werte auf eine Durchflussrichtung von rechts nach links.<br />
+<br />
+<br />
+
 {% endblock %}
 
 {% block solution %}

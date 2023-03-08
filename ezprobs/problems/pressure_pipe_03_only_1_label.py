@@ -60,12 +60,8 @@ def compute_solution():
             g2 = 2*g   
             "ex = np.array([0,100,100,300])"
             energy_line = np.array([h_o-v2/g2*(zheta),h_o-v2/g2*(zheta+lambda_1*l_1/d),h_o-v2/g2*(zheta+lambda_1*l_1/d)-height,h_u+v2/g2])
-            energy_line_left = np.array([h_o-v2/g2*(zheta),h_o-v2/g2*(zheta+lambda_1*l_1/d)])
-            energy_line_right = np.array([h_o-v2/g2*(zheta+lambda_1*l_1/d)-height,h_u+v2/g2])
             "prx = np.array([0,100,100,300])"
             pressure_line = np.array([h_o-v2/g2*(zheta+1),h_o-v2/g2*(zheta+lambda_1*l_1/d+1),h_o-v2/g2*(zheta+lambda_1*l_1/d+1)-height,h_u])
-            pressure_line_left = np.array([h_o-v2/g2*(zheta+1),h_o-v2/g2*(zheta+lambda_1*l_1/d+1)])
-            pressure_line_right = np.array([h_o-v2/g2*(zheta+lambda_1*l_1/d+1)-height,h_u])
         else: #"Water from left to right, further accelerated by a pump."
             fd = 0
             height = abs(height)
@@ -76,23 +72,15 @@ def compute_solution():
             g2 = 2*g
             #"ex = np.array([0,100,100,300])
             energy_line = np.array([h_o-v2/g2*(zheta),h_o-v2/g2*(zheta+lambda_1*l_1/d),h_u+v2/g2*(lambda_1*l_2/d+1),h_u+v2/g2])
-            energy_line_left = np.array([h_o-v2/g2*(zheta),h_o-v2/g2*(zheta+lambda_1*l_1/d)])
-            energy_line_right = np.array([h_u+v2/g2*(lambda_1*l_2/d+1),h_u+v2/g2])
             #"prx = np.array([0,100,100,300])
             pressure_line = np.array([h_o-v2/g2*(zheta+1),h_o-v2/g2*(zheta+lambda_1*l_1/d+1),h_u+v2/g2*(lambda_1*l_2/d),h_u])
-            pressure_line_left = np.array([h_o-v2/g2*(zheta+1),h_o-v2/g2*(zheta+lambda_1*l_1/d+1)])
-            pressure_line_right = np.array([h_u+v2/g2*(lambda_1*l_2/d),h_u])
             
     elif q == 0:
         fd = 0
         power_pump = 0
         power_turbine = 0
         energy_line = np.array([h_o,h_o,h_u,h_u])
-        energy_line_left = np.array([h_o,h_o])
-        energy_line_right = np.array([h_u,h_u])
         pressure_line = np.array([h_o,h_o,h_u,h_u]) 
-        pressure_line_left = np.array([h_o,h_o]) 
-        pressure_line_right = np.array([h_u,h_u]) 
         
             
     else: #"Water going from right to left witht the help of a pump."
@@ -108,19 +96,15 @@ def compute_solution():
         g2 = 2*g
         #"ex = np.array([0,100,100,300])
         energy_line = np.array([h_o+v2/g2,h_o+v2/g2*(lambda_1*l_1/d+1),h_u-v2/g2*(zheta+l_2*lambda_1/d),h_u-v2/g2*(zheta)])
-        energy_line_left = np.array([h_o+v2/g2,h_o+v2/g2*(lambda_1*l_1/d+1)])
-        energy_line_right = np.array([h_u-v2/g2*(zheta+l_2*lambda_1/d),h_u-v2/g2*(zheta)])
         #"prx = np.array([0,100,100,300])
         pressure_line = np.array([h_o,h_o+v2/g2*(lambda_1*l_1/d),h_u-v2/g2*(zheta+l_2*lambda_1/d+1),h_u-v2/g2*(zheta+1)])
-        pressure_line_left = np.array([h_o,h_o+v2/g2*(lambda_1*l_1/d)])
-        pressure_line_right = np.array([h_u-v2/g2*(zheta+l_2*lambda_1/d+1),h_u-v2/g2*(zheta+1)])
 
     
 
     distances = np.array([0, 100, 0, 200])
 
     x = np.cumsum(distances)
-    pipe = np.array([230, 120, 120, 130])
+    pipe = np.array([230, 130, 130, 130])
     energy_horizon = np.full((len(x)), h_o)
 	
 
@@ -135,11 +119,7 @@ def compute_solution():
         "pressure_line": pressure_line.tolist(),
         "power_pump": power_pump,
         "power_turbine": power_turbine,
-        "flow_direction" : fd,
-        "energy_line_left": energy_line_left.tolist(),
-        "energy_line_right": energy_line_right.tolist(),
-        "pressure_line_left": pressure_line_left.tolist(),
-        "pressure_line_right": pressure_line_right.tolist(),
+        "flow_direction": fd,
     }
 
 
@@ -193,10 +173,6 @@ def plot_function():
     power_pump = session["solution"]["power_pump"]
     power_turbine = session["solution"]["power_turbine"]
     fd = session["solution"]["flow_direction"]
-    energy_line_right = session["solution"]["energy_line_right"]
-    energy_line_left = session["solution"]["energy_line_left"]
-    pressure_line_left = session["solution"]["pressure_line_left"]
-    pressure_line_right = session["solution"]["pressure_line_right"]
     
 
     #xticks = np.array([0, l1, l1+l2, l1+l2+l3])
@@ -214,7 +190,7 @@ def plot_function():
     ax.plot(x, energy_horizon, label=lang["ehorizont_l"], color="red", linestyle="dashdot", lw=1)
     ax.plot(x, energy_line, label=lang["eline_l"], color="red", lw=1.5)
     ax.plot(x, pressure_line, label=lang["pline_l"], color="blue", linestyle="dashed", lw=1.5)
-    ax.plot(x, pipe, label=lang["paxis"], color="black", linestyle="dashed", lw=1)
+    ax.plot(x, pipe, label=lang["paxis"], color="black", linestyle="dashd""ot", lw=1)
     ax.plot(x, np.array(pipe)+d/2, color="grey", linestyle="-", lw=0.5)
     ax.plot(x,  np.array(pipe)-d/2, color="grey", linestyle="-", lw=0.5)
     
@@ -229,40 +205,24 @@ def plot_function():
     
     plt.title(f'Turbinenleistung:{power_turbine/1000: 6.2f} MW \nPumpenleistung:{power_pump/1000: 6.2f} MW')
     ax.text(x[-1], ha, lang["ehorizont_s"], ha='right', va="bottom")
-    
-    #printing leftside labels
-    pos_EL_l = np.mean(energy_line_left)
-    pos_PL_l = np.mean(pressure_line_left)
-    diff_l = abs(pos_EL_l-pos_PL_l)
-    if diff_l < 10:
-        ax.text(50, np.mean(energy_line_left)+3, lang["eline_s"], ha='left', va="bottom", color="red")
-        ax.text(50, np.mean(pressure_line_left)-10, lang["pline_s"], ha='left', va="bottom", color="blue")
+    pos_EL = np.mean(energy_line)
+    pos_PL = np.mean(pressure_line)
+    diff = abs(pos_EL-pos_PL)
+    if diff < 10:
+        ax.text(x[-1]/2, np.mean(energy_line), lang["eline_s"], ha='left', va="bottom", color="red")
+        ax.text(x[-1]/2, np.mean(pressure_line)-10, lang["pline_s"], ha='left', va="bottom", color="blue")
     else:
-        ax.text(50, np.mean(energy_line_left)+3, lang["eline_s"], ha='left', va="bottom", color="red")
-        ax.text(50, np.mean(pressure_line_left)+3, lang["pline_s"], ha='left', va="bottom", color="blue")
-    #printing rightside labels
-    pos_EL_r = np.mean(energy_line_right)
-    pos_PL_r = np.mean(pressure_line_right)
-    diff_r = abs(pos_EL_r-pos_PL_r)
-    if diff_r < 10:
-        ax.text(200, np.mean(energy_line_right)+3, lang["eline_s"], ha='left', va="bottom", color="red")
-        ax.text(200, np.mean(pressure_line_right)-10    , lang["pline_s"], ha='left', va="bottom", color="blue")
-    else:
-        ax.text(200, np.mean(energy_line_right)+3, lang["eline_s"], ha='left', va="bottom", color="red")
-        ax.text(200, np.mean(pressure_line_right)+3, lang["pline_s"], ha='left', va="bottom", color="blue")
-    
+        ax.text(x[-1]/2, np.mean(energy_line), lang["eline_s"], ha='left', va="bottom", color="red")
+        ax.text(x[-1]/2, np.mean(pressure_line), lang["pline_s"], ha='left', va="bottom", color="blue")
     ax.text(0, ha-30, f"DN{int(d*1000)} ", ha='right', va="center")
     phi = np.linspace(0, 2*np.pi, 50)
     x_circle = 10*np.sin(phi)
     y_circle = 10*np.cos(phi)
-    c = plt.Circle((100, 120), 10, color="w", zorder=2)
-    ax.add_artist(c)
-    ax.plot(100+x_circle, 120+y_circle, color="k", zorder=4)
+    ax.plot(100+x_circle, 130+y_circle, color="k")
     phi = np.array([np.pi/2,-np.pi/6,7*np.pi/6,np.pi/2]) + fd
     x_triangle = 10*np.sin(phi)
     y_triangle = 10*np.cos(phi)
-    #ax.plot(100+x_triangle, 120+y_triangle, color="k", zorder=4) 
-    ax.fill(100+x_triangle, 120+y_triangle, color="k", zorder=3)  
+    ax.plot(100+x_triangle, 130+y_triangle, color="k")
     
 	# add labels 
     #ax.text(x[0],ha-10,'I ',ha="right")
@@ -270,26 +230,20 @@ def plot_function():
     #ax.text(x[3],h3,'III', va='bottom', ha='center')
     #ax.text(x[5],h4,' IV')
 	
-    ax.grid(axis='both')
+    ax.grid(axis='x')
     #ax.legend()
-    ax.set_yticks([120,150,250])
-    ax.set_yticklabels(["120 m.ü.A.", "150 m.ü.A.", "250 m.ü.A."])
-    
-    ax.set_xticks([0,100,300])
-    ax.set_xticklabels(["Speicher A", "Pumpturbine", "Speicher B"])
-    
+    ax.set_xlim((-40,x[-1]+40))
+    ax.set_ylim((100,300))
     plt.axis("equal")
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0.1),
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=4)
     #ax.set_xlabel("Distance [m]")
-    #ax.set_ylabel(lang["height"]+" [m]")
+    ax.set_ylabel(lang["height"]+" [m]")
     #ax.set_title("Pressure- and Energyline")
     
     
-    #secax = ax.secondary_yaxis("right")
-    #secax.spines["right"].set_visible(False)
-    ax.set_xlim((-40,x[-1]+40))
-    ax.set_ylim((110,260))
+    secax = ax.secondary_yaxis("right")
+    secax.spines["right"].set_visible(False)
     
     buffer = BytesIO()
     fig.savefig(buffer, format="png")

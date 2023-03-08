@@ -1,7 +1,6 @@
 {% extends "problem.html" %}
 
-{% block title %}Druckabfluss{% endblock %}
-
+{% block title %}Rohrsystem mit Druckabfluss{% endblock %}
 {% block description %}
 <div class="container" align="center">
   <figure class="figure">
@@ -11,27 +10,9 @@
     <figcaption class="figure-caption">Speicher</figcaption>
   </figure>
 </div>
-
-\(k\) \(\nu\).
- \(\zeta_{entry}\).
-
-$$
-%\begin{align}
-%h_A &= 360\:\mathrm{m.a.s.l.} \\
-%h_B &= 197.20\:\mathrm{m.a.s.l.} \\
-%h_{II} &= 231.60\:\mathrm{m.a.s.l.} \\
-%h_{III} &= 260.50\:\mathrm{m.a.s.l.} \\
-%h_{VI} &= 210.45\:\mathrm{m.a.s.l.} \\
-%l_{I,II} &= 280\:\mathrm{m} \\
-%l_{II,III} &= 150\:\mathrm{m} \\
-%l_{III,VI} &= 350\:\mathrm{m} \\
-%k &= 0.3\:\mathrm{mm} \\
-%\zeta_{entry} &= 0.5\\
-%\nu &= 1.3\cdot10^{-6}\:\mathrm{m^2/s} \\
-%\end{align}
-$$
+ Dieses Problem beschäftigt sich erneut mit dem Druckabfluss zwischen zwei miteinander verbundenen Behältern, hier werden jedoch alleine die Rohurchmesser der Rohrabschnitte variabel dargestellt. Wie verändert sich die Druckline im Vergleich zum Rohrdurchmesser? <br>
+ Auch hier werden der Rauheitsbeiwert des Rohrs \(k\), die kinematische Viskosität des Wassers \(\nu\) und der Einlaufwiderstandsbeiwert \(\zeta_{Einlauf}\) konstant gehalten.
 {% endblock %}
-
 {% block solution %}
 {% include "problems/pressure_pipe_01_solution.html" ignore missing with context %}
 {% endblock %}

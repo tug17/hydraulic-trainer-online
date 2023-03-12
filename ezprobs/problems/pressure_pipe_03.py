@@ -158,7 +158,7 @@ def index():
             35,
             5,
             solution["q"] / M3PS,
-            unit="M^3PS",
+            unit="m^3/s",
             description=lang["discharge"],
         ),
     ]

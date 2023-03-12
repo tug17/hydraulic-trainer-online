@@ -50,6 +50,8 @@ def t_n_rect(discharge, strickler_roughness, inclination, width, start=1):
         * A(width, h)
         - discharge,
         start,
+        xtol=1e-03,
+        maxfev=100,
     )[0]
 
 
@@ -179,6 +181,8 @@ def depthBernoulli(
         + (discharge / (width * t)) ** 2 / (2 * GRAVITY)
         - lhs,
         start,
+        xtol=1e-03,
+        maxfev=100,
     )[0]
 
 
@@ -201,6 +205,8 @@ def lambda_turbulent_transition(k, d, re):
         lambda lam: (1 / (2 * log(2.51 / (re * sqrt(lam)) + k / d / 3.71, 10))) ** 2
         - lam,
         lambda_turbulent_rough(k, d),
+        xtol=1e-06,
+        maxfev=100,
     )[0]
 
 
